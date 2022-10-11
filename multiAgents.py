@@ -13,6 +13,7 @@
 
 
 from cmath import inf
+from hashlib import new
 from util import manhattanDistance
 from game import Directions
 import random, util
@@ -75,11 +76,32 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
+        #se ejecuta cada vez que el pacman se mueve
+        #por tanto, esto solo nos va a dar el score del siguiente pasito que va a dar
+        # entonces hay que hacer un score de como de bien o mal estamos en ese momento
+        # basicamente el juego va a tener una serie de opciones a realizar y nosotros vamos
+        # a establecer cómo de bueno es el estado en el que vamos a estar si realizamos esa accion (es decir, vamos a ver su utilidad)       
+        
+        valoracion = 0
 
-        util.manhattanDistance()
-        
-        
-        return successorGameState.getScore()
+        #distancia 
+
+        for ghost in newGhostStates:
+            posicion_fantasma = ghost.getPosition()
+            distancia = manhattanDistance(newPos, posicion_fantasma)
+            valoracion = valoracion + distancia
+
+        #comida
+
+        for pos_comida in newFood.asList():
+            distancia_comi = util.manhattanDistance(pos_comida, newPos )
+            valoracion = valoracion + distancia_comi
+
+
+
+
+
+        return distancia
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -144,13 +166,11 @@ class MinimaxAgent(MultiAgentSearchAgent):
         print('Get legal actions fantasmas 1: ', gameState.getLegalActions(1))
         print('Get legal actions fantasmas 2: ', gameState.getLegalActions(2))
         print('Get legal actions fantasmas 3: ', gameState.getLegalActions(3))
-
         print('Get number of agents: ', gameState.getNumAgents())
         print('Is win? ', gameState.isWin())
         print('Is lose? ', gameState.isLose())
         print('\n')
-        if gameState.isWin()
-        self.maxvalue(gameState)
+        
         #util.raiseNotDefined()
     
     def maxvalue(self, state):
