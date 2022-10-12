@@ -83,25 +83,62 @@ class ReflexAgent(Agent):
         # a establecer cómo de bueno es el estado en el que vamos a estar si realizamos esa accion (es decir, vamos a ver su utilidad)       
         
         valoracion = 0
+        superint = (2**31)-1
+        miniint = -(2**31)-1
+        distancias_a_comidas =  list()
+        distancias_a_fantasmas = list()
+        
+        #estados finales:
 
-        #distancia 
+        if successorGameState.isWin():
+            return superint
+        if successorGameState.isLose():
+            return miniint
 
-        for ghost in newGhostStates:
-            posicion_fantasma = ghost.getPosition()
-            distancia = manhattanDistance(newPos, posicion_fantasma)
-            valoracion = valoracion + distancia
+       
+          #distancias a los fantasmas
 
-        #comida
+        posFantasmas = successorGameState.getGhostPositions()
+        for fantasmaPos in posFantasmas:
+            dist = manhattanDistance(newPos , fantasmaPos)
+            distancias_a_fantasmas.append(dist)
 
-        for pos_comida in newFood.asList():
-            distancia_comi = util.manhattanDistance(pos_comida, newPos )
-            valoracion = valoracion + distancia_comi
+        #tenemos que tener en cuenta que cuanto mas cerca
+        #estemos de los fantasmas peor es la utilidad, es decir,
+        #peor es el estado:
+
+        for dist in distancias_a_fantasmas:
+            if dist<=1: #si esta muy cerca
+                valoracion = miniint #mala opcion
+                return valoracion
+
+       
+            
+        #distancias a las comidas
+        
+        for comida in newFood.asList():
+            dist = manhattanDistance(newPos, comida)
+            distancias_a_comidas.append(dist)
+        
+        #tenemos que tener en cuenta que cuanto mas cerca
+        #estemos de la comida mayor es la utilidad, es decir,
+        #mejor es el estado:
+
+        if len(distancias_a_comidas) == 0: #si estan las distancias vacias significaria que ya no hay comidas, es decir
+                                            #estariamos en una situacion muy beneficiosa
+            valoracion = superint
+            return valoracion
 
 
+        if newPos==currentGameState.getPacmanPosition():
+            valoracion=miniint
+            return valoracion
 
 
-
-        return distancia
+        return  currentGameState.getScore() +  99999/len(distancias_a_comidas) + 1/sum(distancias_a_comidas) 
+        
+  
+        
 
 def scoreEvaluationFunction(currentGameState):
     """
