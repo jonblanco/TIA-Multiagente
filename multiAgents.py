@@ -215,10 +215,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 # ->Si el valorMinimo que conseguimos analizando a los fantasmas es mayor que
                 #   el topeMinimo que llevamos arrastrando entonces topeMinimo pasa a ser lo mismo
                 #   que el valorMinimo y accionARealizar pasa a ser la propia accion analizada
-                if(valorMinimo > topeMinimo):                                                                            
+                if valorMinimo > topeMinimo:                                                                            
                     topeMinimo,accionARealizar=valorMinimo,accion
             # ->Devolvemos el topeMinimo y la accionARealizar
-            return(topeMinimo,accionARealizar)
+            return topeMinimo,accionARealizar
 
 
         def minvalue(estado,agente,profundidadDeCapa):
