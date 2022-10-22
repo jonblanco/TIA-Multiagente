@@ -273,7 +273,81 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def maxvalue(estado,profundidadDeCapa, alfa, beta):
+            acciones=estado.getLegalActions(0)
+
+            #Por si estamos en algun caso critico
+            if len(acciones)==0 or profundidadDeCapa==self.depth:            
+                return self.evaluationFunction(estado),None
+
+            topeMinimo=-float("inf") #Integer minimo o -infinito
+            accionARealizar=None
+            #Por cada accion que pueda realizar el pacman ->
+            for accion in acciones:  
+                # ->Conseguimos el valor minimo que puede conseguir el proximo fantasma (agente 1)                                                                       
+                #   Generamos un estado con estado.generateSuccessor(0,accion) 
+                #   * usando 0 porque es el agente=0, es decir, el pacman
+                #   * y usando tambien el movimiento que realiza el agente, es decir 'accion'
+                valorMinimo=minvalue(estado.generateSuccessor(0,accion),1,profundidadDeCapa, alfa, beta)  
+                valorMinimo=valorMinimo[0]   
+
+                # ->Si el valorMinimo que conseguimos analizando a los fantasmas es mayor que
+                #   el topeMinimo que llevamos arrastrando entonces topeMinimo pasa a ser lo mismo
+                #   que el valorMinimo y accionARealizar pasa a ser la propia accion analizada
+                if(valorMinimo > topeMinimo):                                                                            
+                    topeMinimo,accionARealizar=valorMinimo,accion
+                if(valorMinimo > beta):
+                    return (topeMinimo, accionARealizar)
+                else:
+                    alfa = max(alfa, valorMinimo)
+            # ->Devolvemos el topeMinimo y la accionARealizar
+            return(topeMinimo,accionARealizar)
+
+
+        def minvalue(estado,agente,profundidadDeCapa, alfa, beta):
+            acciones=estado.getLegalActions(agente)
+
+            #Por si el agente no puede realizar ninguna accion más
+            if len(acciones) == 0:
+                return(self.evaluationFunction(estado),None)
+
+            topeMaximo=float("inf") #Integer maximo o +infinito  
+            
+            accionARealizar=None
+            #   ->Por cada accion que puede realizar el agente se intenta sacar el minimo que deben
+            #     sacar los demás fantasmas o el maximo que debe sacar el pacman en el siguiente 
+            #     movimiento.
+            for accion in acciones:
+                if agente==estado.getNumAgents()-1:
+                #   ->Comprobamos si estamos operando con el ultimo fantasma
+                #     en este caso debemos sacar el maximo del agente 0, es decir, el pacman
+                #     pero incrementando la capa o el depth
+                    valor=maxvalue(estado.generateSuccessor(agente,accion),profundidadDeCapa + 1, alfa, beta)
+                else:
+                #   ->En caso contrario, significa que aun quedan mas fantasmas por analizar
+                #     por eso mismo seguimos haciendo uso de la funcion minvalue con el proximo agente
+                    valor=minvalue(estado.generateSuccessor(agente,accion),agente+1,profundidadDeCapa, alfa, beta) 
+                valor = valor[0]
+
+                # Si el valor conseguido es menor que el topeMaximo actualizaremos el topeMaximo con
+                # ese valor, y accionARealizar sera la accion correspondiente a ese valor conseguido
+                if valor < topeMaximo:
+                    topeMaximo,accionARealizar=valor,accion
+                if(valor<alfa):
+                    return(topeMaximo,accionARealizar)
+                else: 
+                    beta = min(beta,valor)
+            return topeMaximo,accionARealizar
+
+        #Llamamos al algoritmo intentando conseguir el valorMaximo de nuestro agente
+        alfa = -float("inf") #primera inicializacion de alfa (menos Infinito)
+        beta = float("inf") #primera incializacion de beta (plus Infinito)
+        maxvalue=maxvalue(gameState,0, alfa, beta)[1]
+    
+        return maxvalue
+
+        
+        #util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -288,7 +362,75 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
+        def maxvalue(estado,profundidadDeCapa):
+            acciones=estado.getLegalActions(0)
+
+            #Por si estamos en algun caso critico
+            if len(acciones)==0 or profundidadDeCapa==self.depth:            
+                return self.evaluationFunction(estado),None
+
+            topeMinimo=-float("inf") #Integer minimo o -infinito
+            accionARealizar=None
+            #Por cada accion que pueda realizar el pacman ->
+            for accion in acciones:  
+                # ->Conseguimos el valor minimo que puede conseguir el proximo fantasma (agente 1)                                                                       
+                #   Generamos un estado con estado.generateSuccessor(0,accion) 
+                #   * usando 0 porque es el agente=0, es decir, el pacman
+                #   * y usando tambien el movimiento que realiza el agente, es decir 'accion'
+                valorMinimo=expvalue(estado.generateSuccessor(0,accion),1,profundidadDeCapa)  
+                valorMinimo=valorMinimo[0]   
+
+                # ->Si el valorMinimo que conseguimos analizando a los fantasmas es mayor que
+                #   el topeMinimo que llevamos arrastrando entonces topeMinimo pasa a ser lo mismo
+                #   que el valorMinimo y accionARealizar pasa a ser la propia accion analizada
+                if(valorMinimo > topeMinimo):                                                                            
+                    topeMinimo,accionARealizar=valorMinimo,accion
+            # ->Devolvemos el topeMinimo y la accionARealizar
+            return(topeMinimo,accionARealizar)
+
+
+        def expvalue(estado,agente,profundidadDeCapa):
+            
+            acciones=estado.getLegalActions(agente)
+
+            #Por si el agente no puede realizar ninguna accion más
+            if len(acciones) == 0:
+                return(self.evaluationFunction(estado),None)
+
+            topeMaximo=float("inf") #Integer maximo o +infinito  
+            
+            accionARealizar=None
+            #   ->Por cada accion que puede realizar el agente se intenta sacar el minimo que deben
+            #     sacar los demás fantasmas o el maximo que debe sacar el pacman en el siguiente 
+            #     movimiento.
+            for accion in acciones:
+                if agente==estado.getNumAgents()-1:
+                #   ->Comprobamos si estamos operando con el ultimo fantasma
+                #     en este caso debemos sacar el maximo del agente 0, es decir, el pacman
+                #     pero incrementando la capa o el depth
+                    sucesor = estado.generateSuccessor(agente,accion)
+                    p = calcula_probabilidad(estado,agente)
+                    
+                    valor +=  (p * maxvalue(sucesor,profundidadDeCapa + 1))
+                else:
+                #   ->En caso contrario, significa que aun quedan mas fantasmas por analizar
+                #     por eso mismo seguimos haciendo uso de la funcion minvalue con el proximo agente
+                    valor = expvalue(estado.generateSuccessor(agente,accion),agente+1,profundidadDeCapa) 
+                valor = valor[0]
+            return topeMaximo,accionARealizar
+
+        def calcula_probabilidad(estado, agente):
+            numero_acciones = len(estado.getLegalActions(agente))
+            return 1/numero_acciones #asi la probabilidad siempre será 1 entre el numero de acciones posibles. Si hay 5 
+                                     # acciones posibles pues 1/5, si hay 6 1/6, si son 7 1/7...   
+        
+        #Llamamos al algoritmo intentando conseguir el valorMaximo de nuestro agente
+        
+        maxvalue=maxvalue(gameState,0)[1]
+        return maxvalue
+
         util.raiseNotDefined()
+        
 
 def betterEvaluationFunction(currentGameState):
     """
