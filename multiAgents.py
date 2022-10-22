@@ -179,49 +179,85 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         Returns the minimax action from the current gameState using self.depth
         and self.evaluationFunction.
-
         Here are some method calls that might be useful when implementing minimax.
-
         gameState.getLegalActions(agentIndex):
         Returns a list of legal actions for an agent
         agentIndex=0 means Pacman, ghosts are >= 1
-
         gameState.generateSuccessor(agentIndex, action):
         Returns the successor game state after an agent takes an action
-
         gameState.getNumAgents():
         Returns the total number of agents in the game
-
         gameState.isWin():
         Returns whether or not the game state is a winning state
-
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        print('Get legal actions pacman: ', gameState.getLegalActions(0))
-        print('Get legal actions fantasmas 1: ', gameState.getLegalActions(1))
-        print('Get legal actions fantasmas 2: ', gameState.getLegalActions(2))
-        print('Get legal actions fantasmas 3: ', gameState.getLegalActions(3))
-        print('Get number of agents: ', gameState.getNumAgents())
-        print('Is win? ', gameState.isWin())
-        print('Is lose? ', gameState.isLose())
-        print('\n')
         
-        #util.raiseNotDefined()
-    
-    def maxvalue(self, state):
-        max_v = -((2**31)-1) #integer minimo
-        for sucesor in state.getSuccessors():
-            max_v = max(max_v, self.minvalue(sucesor))
-        return max_v
+        def maxvalue(estado,profundidadDeCapa):
+            acciones=estado.getLegalActions(0)
 
-    
-    def minvalue(self, state):
-        min_v = (2**31)-1
-        for sucesor in state.getSuccessors():
-            min_v = min(min_v, self.maxvalue(sucesor))
-        return min_v
+            #Por si estamos en algun caso critico
+            if len(acciones)==0 or profundidadDeCapa==self.depth:            
+                return self.evaluationFunction(estado),None
+
+            topeMinimo=-float("inf") #Integer minimo o -infinito
+            accionARealizar=None
+            #Por cada accion que pueda realizar el pacman ->
+            for accion in acciones:  
+                # ->Conseguimos el valor minimo que puede conseguir el proximo fantasma (agente 1)                                                                       
+                #   Generamos un estado con estado.generateSuccessor(0,accion) 
+                #   * usando 0 porque es el agente=0, es decir, el pacman
+                #   * y usando tambien el movimiento que realiza el agente, es decir 'accion'
+                valorMinimo=minvalue(estado.generateSuccessor(0,accion),1,profundidadDeCapa)  
+                valorMinimo=valorMinimo[0]   
+
+                # ->Si el valorMinimo que conseguimos analizando a los fantasmas es mayor que
+                #   el topeMinimo que llevamos arrastrando entonces topeMinimo pasa a ser lo mismo
+                #   que el valorMinimo y accionARealizar pasa a ser la propia accion analizada
+                if(valorMinimo > topeMinimo):                                                                            
+                    topeMinimo,accionARealizar=valorMinimo,accion
+            # ->Devolvemos el topeMinimo y la accionARealizar
+            return(topeMinimo,accionARealizar)
+
+
+        def minvalue(estado,agente,profundidadDeCapa):
+            acciones=estado.getLegalActions(agente)
+
+            #Por si el agente no puede realizar ninguna accion más
+            if len(acciones) == 0:
+                return(self.evaluationFunction(estado),None)
+
+            topeMaximo=float("inf") #Integer maximo o +infinito  
+            
+            accionARealizar=None
+            #   ->Por cada accion que puede realizar el agente se intenta sacar el minimo que deben
+            #     sacar los demás fantasmas o el maximo que debe sacar el pacman en el siguiente 
+            #     movimiento.
+            for accion in acciones:
+                if agente==estado.getNumAgents()-1:
+                #   ->Comprobamos si estamos operando con el ultimo fantasma
+                #     en este caso debemos sacar el maximo del agente 0, es decir, el pacman
+                #     pero incrementando la capa o el depth
+                    valor=maxvalue(estado.generateSuccessor(agente,accion),profundidadDeCapa + 1)
+                else:
+                #   ->En caso contrario, significa que aun quedan mas fantasmas por analizar
+                #     por eso mismo seguimos haciendo uso de la funcion minvalue con el proximo agente
+                    valor=minvalue(estado.generateSuccessor(agente,accion),agente+1,profundidadDeCapa) 
+                valor = valor[0]
+
+                # Si el valor conseguido es menor que el topeMaximo actualizaremos el topeMaximo con
+                # ese valor, y accionARealizar sera la accion correspondiente a ese valor conseguido
+                if valor < topeMaximo:
+                    topeMaximo,accionARealizar=valor,accion
+            return topeMaximo,accionARealizar
+
+        #Llamamos al algoritmo intentando conseguir el valorMaximo de nuestro agente
+        maxvalue=maxvalue(gameState,0)[1]
+        return maxvalue
+
+        util.raiseNotDefined()
+        
 
 
     
