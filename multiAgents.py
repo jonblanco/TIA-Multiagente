@@ -479,8 +479,8 @@ def betterEvaluationFunction(currentGameState):
         comidaLejana=max(distPacmanComida)
     numComidas=len(comidas)
 
-    puntuacion=-sumaDistanciaComidas*5+sumaDistanciaFantasmas*10+comidaCercana-comidaLejana+numComidas+capsulasComidas*100
-    #print(puntuacion)
+    puntuacion=-sumaDistanciaComidas+sumaDistanciaFantasmas+capsulasComidas
+    
     return currentGameState.getScore()+puntuacion
 
     util.raiseNotDefined()
