@@ -11,7 +11,7 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-
+import math
 from cmath import inf
 from hashlib import new
 from util import manhattanDistance
@@ -443,6 +443,56 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
+    puntuacion=0
+    
+    #Sacamos las posiciones de las comidas
+    comidas = currentGameState.getFood().asList()
+    #La posicion de nuestro Pacman
+    posicionPacman = currentGameState.getPacmanPosition()
+    #El estado de los fantasmas
+    estadosFantasmas = currentGameState.getGhostStates()
+    #El numero de capsulas comidas
+    capsulasComidas = len(currentGameState.getCapsules())
+    #Sacamos las posiciones de cada fantasma 
+    posicionFantasmas = [fantasma.getPosition() for fantasma in estadosFantasmas]
+    #Y tambien sacamos el numero de sustos que lleva cada fantasma
+    numeroSustos = [fantasma.scaredTimer for fantasma in estadosFantasmas]
+
+
+    
+    #Calculamos la distancia a la que se encuentra el Pacman de las comidas
+    distPacmanComida=[]
+    for comida in comidas:
+        distPacmanComida.append(pitagoras(comida,posicionPacman))
+
+    #Calculamos la distancia a la que se encuentra el Pacman de los demas fantasmas
+    distPacmanFantasma=[]
+    for fantasma in posicionFantasmas:
+        distPacmanFantasma.append(pitagoras(fantasma,posicionPacman))
+
+    sumaDistanciaComidas=sum(distPacmanComida)
+    sumaDistanciaFantasmas=sum(distPacmanFantasma)
+    comidaCercana=0
+    comidaLejana=0
+    if len(distPacmanComida)>0: #Si no hacemos este if da error por que la lista se puede quedar vacia
+        comidaCercana=min(distPacmanComida)
+        comidaLejana=max(distPacmanComida)
+    numComidas=len(comidas)
+
+    puntuacion=-sumaDistanciaComidas*5+sumaDistanciaFantasmas*10+comidaCercana-comidaLejana+numComidas+capsulasComidas*100
+    #print(puntuacion)
+    return currentGameState.getScore()+puntuacion
+
+    util.raiseNotDefined()
+
+def pitagoras(pos1,pos2):
+    x1,y1=pos1
+    x2,y2=pos2
+    px = x2-x1
+    py = y2-y1
+    sumapotencias=px**2+py**2
+    hipotenusa=math.sqrt(sumapotencias)
+    return hipotenusa
     util.raiseNotDefined()
 
 # Abbreviation
