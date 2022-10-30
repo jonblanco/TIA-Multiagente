@@ -245,7 +245,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 #     por eso mismo seguimos haciendo uso de la funcion minvalue con el proximo agente
                     valor=minvalue(estado.generateSuccessor(agente,accion),agente+1,profundidadDeCapa) 
                 valor = valor[0]
-
                 # Si el valor conseguido es menor que el topeMaximo actualizaremos el topeMaximo con
                 # ese valor, y accionARealizar sera la accion correspondiente a ese valor conseguido
                 if valor < topeMaximo:
@@ -455,8 +454,8 @@ def betterEvaluationFunction(currentGameState):
     capsulasComidas = len(currentGameState.getCapsules())
     #Sacamos las posiciones de cada fantasma 
     posicionFantasmas = [fantasma.getPosition() for fantasma in estadosFantasmas]
-    #Y tambien sacamos el numero de sustos que lleva cada fantasma
-    numeroSustos = [fantasma.scaredTimer for fantasma in estadosFantasmas]
+    
+    
 
 
     
@@ -472,14 +471,9 @@ def betterEvaluationFunction(currentGameState):
 
     sumaDistanciaComidas=sum(distPacmanComida)
     sumaDistanciaFantasmas=sum(distPacmanFantasma)
-    comidaCercana=0
-    comidaLejana=0
-    if len(distPacmanComida)>0: #Si no hacemos este if da error por que la lista se puede quedar vacia
-        comidaCercana=min(distPacmanComida)
-        comidaLejana=max(distPacmanComida)
-    numComidas=len(comidas)
-
     puntuacion=-sumaDistanciaComidas+sumaDistanciaFantasmas+capsulasComidas
+    #Premiaremos el hecho de que queden menos comidas en el juego, que el pacman se 
+    #mantenga mas alejado de los fantasmas y que el pacman haya comido mas capsulas
     
     return currentGameState.getScore()+puntuacion
 
